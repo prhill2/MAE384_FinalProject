@@ -47,7 +47,6 @@ h = 1;    % Step size
 T = 100;  % Total time
 N_t = T / h; % Number of time steps
 
-% Time vector t(1) = 0;
 
 % Initial conditions
 S(1) = 990; 
@@ -69,18 +68,18 @@ for i = 1:N_t
 
     
     k_1S = dSdt(S(i), I(i));
-    k_2S = dSdt(S(i) + 0.5 * h * k_1S, I(i) + 0.5 * h * k_1S);
-    k_3S = dSdt(S(i) + 0.5 * h * k_2S, I(i) + 0.5 * h * k_2S);
-    k_4S = dSdt(S(i) + h * k_3S, I(i) + h * k_3S);
+    k_2S = dSdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_1S);
+    k_3S = dSdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_2S);
+    k_4S = dSdt(S(i) + h , I(i) + h * k_3S);
 
     
     S(i + 1) = S(i) + (h / 6) * (k_1S + 2 * k_2S + 2 * k_3S + k_4S);
 
 
     k_1I = dIdt(S(i), I(i));
-    k_2I = dIdt(S(i) + 0.5 * h * k_1S, I(i) + 0.5 * h * k_1I);
-    k_3I = dIdt(S(i) + 0.5 * h * k_2S, I(i) + 0.5 * h * k_2I);
-    k_4I = dIdt(S(i) + h * k_3S, I(i) + h * k_3I);
+    k_2I = dIdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_1I);
+    k_3I = dIdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_2I);
+    k_4I = dIdt(S(i) + h , I(i) + h * k_3I);
 
     
     I(i + 1) = I(i) + (h / 6) * (k_1I + 2 * k_2I + 2 * k_3I + k_4I);
@@ -123,18 +122,18 @@ for i = 1:N_t
 
     
     k_1S = dSdt(S(i), I(i));
-    k_2S = dSdt(S(i) + 0.5 * h * k_1S, I(i) + 0.5 * h * k_1S);
-    k_3S = dSdt(S(i) + 0.5 * h * k_2S, I(i) + 0.5 * h * k_2S);
-    k_4S = dSdt(S(i) + h * k_3S, I(i) + h * k_3S);
+    k_2S = dSdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_1S);
+    k_3S = dSdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_2S);
+    k_4S = dSdt(S(i) + h , I(i) + h * k_3S);
 
     
     S(i + 1) = S(i) + (h / 6) * (k_1S + 2 * k_2S + 2 * k_3S + k_4S);
 
 
     k_1I = dIdt(S(i), I(i));
-    k_2I = dIdt(S(i) + 0.5 * h * k_1S, I(i) + 0.5 * h * k_1I);
-    k_3I = dIdt(S(i) + 0.5 * h * k_2S, I(i) + 0.5 * h * k_2I);
-    k_4I = dIdt(S(i) + h * k_3S, I(i) + h * k_3I);
+    k_2I = dIdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_1I);
+    k_3I = dIdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_2I);
+    k_4I = dIdt(S(i) + h , I(i) + h * k_3I);
 
     
     I(i + 1) = I(i) + (h / 6) * (k_1I + 2 * k_2I + 2 * k_3I + k_4I);
@@ -177,18 +176,18 @@ for i = 1:N_t
 
     
     k_1S = dSdt(S(i), I(i));
-    k_2S = dSdt(S(i) + 0.5 * h * k_1S, I(i) + 0.5 * h * k_1S);
-    k_3S = dSdt(S(i) + 0.5 * h * k_2S, I(i) + 0.5 * h * k_2S);
-    k_4S = dSdt(S(i) + h * k_3S, I(i) + h * k_3S);
+    k_2S = dSdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_1S);
+    k_3S = dSdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_2S);
+    k_4S = dSdt(S(i) + h , I(i) + h * k_3S);
 
     
     S(i + 1) = S(i) + (h / 6) * (k_1S + 2 * k_2S + 2 * k_3S + k_4S);
 
 
     k_1I = dIdt(S(i), I(i));
-    k_2I = dIdt(S(i) + 0.5 * h * k_1S, I(i) + 0.5 * h * k_1I);
-    k_3I = dIdt(S(i) + 0.5 * h * k_2S, I(i) + 0.5 * h * k_2I);
-    k_4I = dIdt(S(i) + h * k_3S, I(i) + h * k_3I);
+    k_2I = dIdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_1I);
+    k_3I = dIdt(S(i) + 0.5 * h , I(i) + 0.5 * h * k_2I);
+    k_4I = dIdt(S(i) + h , I(i) + h * k_3I);
 
     
     I(i + 1) = I(i) + (h / 6) * (k_1I + 2 * k_2I + 2 * k_3I + k_4I);
