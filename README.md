@@ -23,7 +23,6 @@ n=30;
 N=1000;
 S0=990;
 y=.1;
-% B=?
 a1=(n*sum(x.*y)-sum(x)*sum(y))/(n*sum(x.^2)-(sum(x))^2);
 a0=sum(y)/n-a1*sum(x)/n;
 a1=k;
