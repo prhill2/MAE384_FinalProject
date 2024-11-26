@@ -18,7 +18,7 @@ f(x)=f(x0)+(f(x1)-f(x0))/(x1-x0)*(x-x0)+((f(x2)-f(x1))/(x2-x1)-(f(x1)-f(x0))/(x1
 
 % Least Squares
 x=t;
-y=ln(I);
+y=ln(I_flu);
 n=30;
 N=1000;
 S0=990;
