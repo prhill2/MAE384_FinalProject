@@ -16,18 +16,28 @@ f(x)=f(x0)+(f(x1)-f(x0))/(x1-x0)*(x-x0);
 %Newton Quadratic Interpolation
 f(x)=f(x0)+(f(x1)-f(x0))/(x1-x0)*(x-x0)+((f(x2)-f(x1))/(x2-x1)-(f(x1)-f(x0))/(x1-x0))/(x2-x0)*(x-x0)*(x-x1);
 
-% Least Squares
-x=t;
-y=ln(I_flu);
+%% Part 3:Least Squares
+% 30 days
+x=t(1:30);
+y=ln(I_flu(1:30));
 n=30;
 N=1000;
 S0=990;
-y=.1;
+y=0.1;
 a1=(n*sum(x.*y)-sum(x)*sum(y))/(n*sum(x.^2)-(sum(x))^2);
 a0=sum(y)/n-a1*sum(x)/n;
 a1=k;
-I0=exp(a0);
-B=(k+y)*N/S0;
+I0_30=exp(a0);
+B_30=(k+y)*N/S0;
+% 10 days 
+x=t(1:10);
+y=ln(I_flu(1:10));
+n=10;
+a1=(n*sum(x.*y)-sum(x)*sum(y))/(n*sum(x.^2)-(sum(x))^2);
+a0=sum(y)/n-a1*sum(x)/n;
+a1=k;
+I0_10=exp(a0);
+B_10=(k+y)*N/S0;
 
 %% Part 1 Practice Code
 
