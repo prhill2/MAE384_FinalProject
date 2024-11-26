@@ -28,7 +28,7 @@ a1=(n*sum(x.*y)-sum(x)*sum(y))/(n*sum(x.^2)-(sum(x))^2);
 a0=sum(y)/n-a1*sum(x)/n;
 a1=k;
 I0=exp(a0);
-
+B=(k+y)*N/S0;
 
 %% Part 1 Practice Code
 
