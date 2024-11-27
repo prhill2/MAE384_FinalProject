@@ -1,6 +1,6 @@
 N = 1000;
 h = 1;
-span = [1,100];
+span = [0,99];
 t = span(1):h:span(2);
 [SI,II,RI] = spread(0.3,0.1,1000,990,10,0,t,h);
 [SC,IC,RC] = spread(1,0.1,1000,990,10,0,t,h);
