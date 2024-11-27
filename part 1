@@ -1,62 +1,113 @@
-N = 1000;
-h = 1;
-span = [0,99];
-t = span(1):h:span(2);
-[SI,II,RI] = spread(0.3,0.1,1000,990,10,0,t,h);
-[SC,IC,RC] = spread(1,0.1,1000,990,10,0,t,h);
-[SM,IM,RM] = spread(2,0.2,1000,990,10,0,t,h);
+%% sets initial values
+N = 1000; %population
+h = 1; %step size
+t = 0:h:99; %time span
+So = 990; %initial susceptible
+Io = 10; %initial infected
+Ro = 0; %initial recovered
+
+%% Run functions
+[SI,II,RI] = spread(0.3,0.1,1000,990,10,0,t,h); %Influenza
+[SC,IC,RC] = spread(1,0.1,1000,990,10,0,t,h); %Covid-19
+[SM,IM,RM] = spread(2,0.2,1000,990,10,0,t,h); %Measles
+
+%% Graphing Functions
 figure(1)
 plot(t,SI,t,II,t,RI)
-legend('Susseptable','Infected','Recovered')
+legend('Susceptible','Infected','Recovered')
 title('Influenza')
 figure(2)
 plot(t,SC,t,IC,t,RC)
-legend('Susseptable','Infected','Recovered')
+legend('Susceptible','Infected','Recovered')
 title('Covid-19')
 figure(3)
 plot(t,SM,t,IM,t,RM)
-legend('Susseptable','Infected','Recovered')
+legend('Susceptible','Infected','Recovered')
 title('Measles')
 
-
+%% spread function
 function [S,I,R] = spread(b,g,N,So,Io,Ro,t,h)
-    function k1s = k1(ds,di,s,i,b,g,N,h)
-        k1s = ds(s,i,b,g,N,h);
-    end
-    function k2s = k2(ds,di,s,i,b,g,N,h)
-        k2s = ds(s+(0.5*h*k1(ds,di,s,i,b,g,N,h)),i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
-    end
-    function k3s = k3(ds,di,s,i,b,g,N,h)
-        k3s = ds(s+(0.5*h*k2(ds,di,s,i,b,g,N,h)),i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
-    end
-    function k4s = k4(ds,di,s,i,b,g,N,h)
-        k4s = ds(s+(h*k3(ds,di,s,i,b,g,N,h)),i+h*di(i,s,b,g,N,h),b,g,N,h);
-    end
-    function k1r = k1r(dr,di,r,i,s,b,g,N,h)
-        k1r = dr(r,i,b,g,N,h);
-    end
-    function k2r = k2r(dr,di,r,i,s,b,g,N,h)
-        k2r = dr(r+(0.5*h*k1r(dr,di,r,i,s,b,g,N,h)),i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
-    end
-    function k3r = k3r(dr,di,r,i,s,b,g,N,h)
-        k3r = dr(r+(0.5*h*k2r(dr,di,r,i,s,b,g,N,h)),i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
-    end
-    function k4r = k4r(dr,di,r,i,s,b,g,N,h)
-        k4r = dr(r+(h*k3r(dr,di,r,i,s,b,g,N,h)),i+h*di(i,s,b,g,N,h),b,g,N,h);
-    end
+    %b=beta, g=gamma, N=population
+    %t=vector with every t value, h=step size
+
+    %differential equations
     ds = @(s,i,b,g,N,h)-(b/N)*s*i;
     di = @(i,s,b,g,N,h)((b/N)*s*i)-(g*i);
     dr = @(r,i,b,g,N,h)g*i;
     
+    %k1-4 functions for susceptible
+        function k1s = k1s(s,i,b,g,N,h)
+            k1s = ds(s,i,b,g,N,h); %k1s is just ds(S(t),I(t))
+        end
+        function k2s = k2s(s,i,b,g,N,h)
+            k2s = ds(s+(0.5*h*k1s(s,i,b,g,N,h)),... %current s value plus 0.5h*k1s
+                i+(0.5*h*di(i,s,b,g,N,h)),... %this calculates I(t+0.5h) using explicit method
+                b,g,N,h); %constants needed for the ds function
+        end
+        function k3s = k3s(s,i,b,g,N,h)
+            k3s = ds(s+(0.5*h*k2s(s,i,b,g,N,h)),... %current s value plus 0.5h*k2s
+                i+(0.5*h*di(i,s,b,g,N,h)),...%this calculates I(t+0.5h) using explicit method
+                b,g,N,h);
+        end
+        function k4s = k4s(s,i,b,g,N,h)
+            k4s = ds(s+(h*k3s(s,i,b,g,N,h)),... %current s value plus h*k3s
+                i+h*di(i,s,b,g,N,h),...%this calculates I(t+h) using explicit method
+                b,g,N,h);
+        end
+
+    %k1-4 functions for infected
+    %in general it's the same principles as for susceptible 
+        function k1i = k1i(i,s,b,g,N,h)
+            k1i = di(i,s,b,g,N,h);
+        end
+        function k2i = k2i(i,s,b,g,N,h)
+            k2i = di(i+(0.5*h*k1i(i,s,b,g,N,h)),...
+                s+(0.5*h*ds(s,i,b,g,N,h)),...
+                b,g,N,h);
+        end
+        function k3i = k3i(i,s,b,g,N,h)
+            k3i = di(i+(0.5*h*k2i(i,s,b,g,N,h)), ...
+                s+(0.5*h*ds(s,i,b,g,N,h)), ...
+                b,g,N,h);
+        end
+        function k4i = k4i(i,s,b,g,N,h)
+            k4i = di(i+(h*k3i(i,s,b,g,N,h)), ...
+                s+h*ds(s,i,b,g,N,h), ...
+                b,g,N,h);
+        end
+
+    %k1-4 functions for recovered
+    %this one needs the current s value because di uses s in k2 onward 
+        function k1r = k1r(r,i,s,b,g,N,h) %include s here for consistancy
+            k1r = dr(r,i,b,g,N,h);
+        end
+        function k2r = k2r(r,i,s,b,g,N,h)
+            k2r = dr(r+(0.5*h*k1r(r,i,s,b,g,N,h)), ...
+                i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
+        end
+        function k3r = k3r(r,i,s,b,g,N,h)
+            k3r = dr(r+(0.5*h*k2r(r,i,s,b,g,N,h)), ...
+                i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
+        end
+        function k4r = k4r(r,i,s,b,g,N,h)
+            k4r = dr(r+(h*k3r(r,i,s,b,g,N,h)), ...
+                i+h*di(i,s,b,g,N,h),b,g,N,h);
+        end
+
+    % sets size of each output vector to be the same size as t
+    % also sets the first value of each vector to the initial value given
     S = zeros(size(t)); S(1) = So;
     I = zeros(size(t)); I(1) = Io;
     R = zeros(size(t)); R(1) = Ro;
+
+    %for loop that implements the following formula for each value:
+    % Y(t+1) = Y(t) + (h/6)*(k1+2ks+2k3+k4)
     for n = 1:size(t,2)-1
-        S(n+1) = S(n)+ (h/6)*(k1(ds,di,S(n),I(n),b,g,N,h)+2*k2(ds,di,S(n),I(n),b,g,N,h)+...
-            2*k3(ds,di,S(n),I(n),b,g,N,h)+k4(ds,di,S(n),I(n),b,g,N,h));
-        I(n+1) = I(n)+ (h/6)*(k1(di,ds,I(n),S(n),b,g,N,h)+2*k2(di,ds,I(n),S(n),b,g,N,h)+...
-            2*k3(di,ds,I(n),S(n),b,g,N,h)+k4(di,ds,I(n),S(n),b,g,N,h));
-        R(n+1) = R(n)+ (h/6)*(k1r(dr,di,R(n),I(n),S(n),b,g,N,h)+2*k2r(dr,di,R(n),I(n),S(n),b,g,N,h)+...
-            2*k3r(dr,di,R(n),I(n),S(n),b,g,N,h)+k4r(dr,di,R(n),I(n),S(n),b,g,N,h));
+        S(n+1) = S(n)+ (h/6)*(k1s(S(n),I(n),b,g,N,h)+2*k2s(S(n),I(n),b,g,N,h)+...
+            2*k3s(S(n),I(n),b,g,N,h)+k4s(S(n),I(n),b,g,N,h));
+        I(n+1) = I(n)+ (h/6)*(k1i(I(n),S(n),b,g,N,h)+2*k2i(I(n),S(n),b,g,N,h)+...
+            2*k3i(I(n),S(n),b,g,N,h)+k4i(I(n),S(n),b,g,N,h));
+        R(n+1) = R(n)+ (h/6)*(k1r(R(n),I(n),S(n),b,g,N,h)+2*k2r(R(n),I(n),S(n),b,g,N,h)+...
+            2*k3r(R(n),I(n),S(n),b,g,N,h)+k4r(R(n),I(n),S(n),b,g,N,h));
     end
 end
