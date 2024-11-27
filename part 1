@@ -1,0 +1,62 @@
+N = 1000;
+h = 1;
+span = [1,100];
+t = span(1):h:span(2);
+[SI,II,RI] = spread(0.3,0.1,1000,990,10,0,t,h);
+[SC,IC,RC] = spread(1,0.1,1000,990,10,0,t,h);
+[SM,IM,RM] = spread(2,0.2,1000,990,10,0,t,h);
+figure(1)
+plot(t,SI,t,II,t,RI)
+legend('Susseptable','Infected','Recovered')
+title('Influenza')
+figure(2)
+plot(t,SC,t,IC,t,RC)
+legend('Susseptable','Infected','Recovered')
+title('Covid-19')
+figure(3)
+plot(t,SM,t,IM,t,RM)
+legend('Susseptable','Infected','Recovered')
+title('Measles')
+
+
+function [S,I,R] = spread(b,g,N,So,Io,Ro,t,h)
+    function k1s = k1(ds,di,s,i,b,g,N,h)
+        k1s = ds(s,i,b,g,N,h);
+    end
+    function k2s = k2(ds,di,s,i,b,g,N,h)
+        k2s = ds(s+(0.5*h*k1(ds,di,s,i,b,g,N,h)),i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
+    end
+    function k3s = k3(ds,di,s,i,b,g,N,h)
+        k3s = ds(s+(0.5*h*k2(ds,di,s,i,b,g,N,h)),i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
+    end
+    function k4s = k4(ds,di,s,i,b,g,N,h)
+        k4s = ds(s+(h*k3(ds,di,s,i,b,g,N,h)),i+h*di(i,s,b,g,N,h),b,g,N,h);
+    end
+    function k1r = k1r(dr,di,r,i,s,b,g,N,h)
+        k1r = dr(r,i,b,g,N,h);
+    end
+    function k2r = k2r(dr,di,r,i,s,b,g,N,h)
+        k2r = dr(r+(0.5*h*k1r(dr,di,r,i,s,b,g,N,h)),i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
+    end
+    function k3r = k3r(dr,di,r,i,s,b,g,N,h)
+        k3r = dr(r+(0.5*h*k2r(dr,di,r,i,s,b,g,N,h)),i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
+    end
+    function k4r = k4r(dr,di,r,i,s,b,g,N,h)
+        k4r = dr(r+(h*k3r(dr,di,r,i,s,b,g,N,h)),i+h*di(i,s,b,g,N,h),b,g,N,h);
+    end
+    ds = @(s,i,b,g,N,h)-(b/N)*s*i;
+    di = @(i,s,b,g,N,h)((b/N)*s*i)-(g*i);
+    dr = @(r,i,b,g,N,h)g*i;
+    
+    S = zeros(size(t)); S(1) = So;
+    I = zeros(size(t)); I(1) = Io;
+    R = zeros(size(t)); R(1) = Ro;
+    for n = 1:size(t,2)-1
+        S(n+1) = S(n)+ (h/6)*(k1(ds,di,S(n),I(n),b,g,N,h)+2*k2(ds,di,S(n),I(n),b,g,N,h)+...
+            2*k3(ds,di,S(n),I(n),b,g,N,h)+k4(ds,di,S(n),I(n),b,g,N,h));
+        I(n+1) = I(n)+ (h/6)*(k1(di,ds,I(n),S(n),b,g,N,h)+2*k2(di,ds,I(n),S(n),b,g,N,h)+...
+            2*k3(di,ds,I(n),S(n),b,g,N,h)+k4(di,ds,I(n),S(n),b,g,N,h));
+        R(n+1) = R(n)+ (h/6)*(k1r(dr,di,R(n),I(n),S(n),b,g,N,h)+2*k2r(dr,di,R(n),I(n),S(n),b,g,N,h)+...
+            2*k3r(dr,di,R(n),I(n),S(n),b,g,N,h)+k4r(dr,di,R(n),I(n),S(n),b,g,N,h));
+    end
+end
