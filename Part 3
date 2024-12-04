@@ -1,0 +1,24 @@
+%% Part 3:Least Squares
+I0_true=10 
+B_true=.3 
+% 30 days
+x=t(1:30);
+y=log(II(1:30));
+n=30;
+N=1000;
+S0=990;
+gamma=0.1;
+a1=(n*sum(x.*y)-sum(x)*sum(y))/(n*sum(x.^2)-(sum(x))^2);
+a0=sum(y)/n-a1*sum(x)/n;
+k=a1;
+I0_30=exp(a0)
+B_30=(k+gamma)*N/S0
+% 10 days 
+x=t(1:10);
+y=log(II(1:10));
+n=10;
+a1=(n*sum(x.*y)-sum(x)*sum(y))/(n*sum(x.^2)-(sum(x))^2);
+a0=sum(y)/n-a1*sum(x)/n;
+k=a1;
+I0_10=exp(a0)
+B_10=(k+gamma)*N/S0
