@@ -40,15 +40,7 @@ a0=sum(y)/n-a1*sum(x)/n;
 k=a1;
 I0_10=exp(a0)
 B_10=(k+gamma)*N/S0
-% 5 days 
-x=t(1:5);
-y=log(II(1:5));
-n=10;
-a1=(n*sum(x.*y)-sum(x)*sum(y))/(n*sum(x.^2)-(sum(x))^2);
-a0=sum(y)/n-a1*sum(x)/n;
-k=a1;
-I0_5=exp(a0)
-B_5=(k+gamma)*N/S0
+
 
 
 %% Part 1 Practice Code
