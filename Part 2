@@ -1,0 +1,229 @@
+%% Part 2
+%% sets initial values
+N = 1000; %population
+h = 2; %step size
+t = 0:h:99; %time span
+So = 990; %initial susceptible
+Io = 10; %initial infected
+Ro = 0; %initial recovered
+
+[SI,II,RI] = spread(0.3,0.1,1000,990,10,0,t,h); %Influenza
+%% Graphing Functions
+figure(1)
+plot(t,SI,t,II,t,RI)
+legend('Susceptible','Infected','Recovered')
+title('Influenza')
+
+%% Linear Lagrange Interpolation
+odd_days = 1:2:99; % Odd days to interpolate
+interp_SI = lagrange_interpolation(t, SI, odd_days);
+interp_II = lagrange_interpolation(t, II, odd_days);
+interp_RI = lagrange_interpolation(t, RI, odd_days);
+
+%% Quadratic Lagrange Interpolation
+odd_days = 1:2:99; % Odd days to interpolate
+quad_interp_SI = quadratic_lagrange_interpolation(t, SI, odd_days);
+quad_interp_II = quadratic_lagrange_interpolation(t, II, odd_days);
+quad_interp_RI = quadratic_lagrange_interpolation(t, RI, odd_days);
+
+%% Linear Lagrange Results
+disp('Interpolated Values:');
+disp(table(odd_days', interp_SI', interp_II', interp_RI', ...
+    'VariableNames', {'Day', 'Susceptible', 'Infected', 'Recovered'}))
+
+%% Quadratic Lagrange Results
+disp('Interpolated Values:');
+disp(table(odd_days', quad_interp_SI', quad_interp_II', quad_interp_RI', ...
+    'VariableNames', {'Day', 'Susceptible', 'Infected', 'Recovered'}))
+
+%% Compute Linear L2 Error
+Nint = length(odd_days); % Nint is the total number of interpolated points
+
+% Values from the model with h = 1
+h_model = 1; % Step size 
+t_model = 0:h_model:99; % Time points 
+[SI_model, II_model, RI_model] = spread(0.3, 0.1, 1000, So, Io, Ro, t_model, h_model);
+
+% Extract model values at the odd_days
+model_SI = SI_model(odd_days);  
+model_II = II_model(odd_days); 
+model_RI = RI_model(odd_days);  
+
+% Compute L2 errors
+EL2_S = sqrt(sum((interp_SI - model_SI).^2) / Nint);
+EL2_I = sqrt(sum((interp_II - model_II).^2) / Nint);
+EL2_R = sqrt(sum((interp_RI - model_RI).^2) / Nint);
+
+% Display results
+fprintf('Linear L2 Error for Susceptible: %.4f\n', EL2_S);
+fprintf('Linear L2 Error for Infected: %.4f\n', EL2_I);
+fprintf('Linear L2 Error for Recovered: %.4f\n', EL2_R);
+
+%% Compute Quadratic L2 Error
+Nint = length(odd_days); % Nint is the total number of interpolated points
+
+% Values from the model with h = 1
+h_model = 1; % Step size 
+t_model = 0:h_model:99; % Time points 
+[SI_model, II_model, RI_model] = spread(0.3, 0.1, 1000, So, Io, Ro, t_model, h_model);
+
+% Compute L2 errors
+EL2_S_quad = sqrt(sum((quad_interp_SI - model_SI).^2) / Nint);
+EL2_I_quad = sqrt(sum((quad_interp_II - model_II).^2) / Nint);
+EL2_R_quad = sqrt(sum((quad_interp_RI - model_RI).^2) / Nint);
+
+% Display the results
+fprintf('Quadratic L2 Error for Susceptible: %.4f\n', EL2_S_quad);
+fprintf('Quadratic L2 Error for Infected: %.4f\n', EL2_I_quad);
+fprintf('Quadratic L2 Error for Recovered: %.4f\n', EL2_R_quad);
+
+%% L2 Errors Table
+% Define L2 errors for both linear and quadratic interpolations
+linear_errors = [EL2_S, EL2_I, EL2_R];
+quadratic_errors = [EL2_S_quad, EL2_I_quad, EL2_R_quad];
+
+% Create the table
+error_table = table(linear_errors', quadratic_errors', ...
+    'VariableNames', {'Linear Interpolation', 'Quadratic Interpolation'}, ...
+    'RowNames', {'Susceptible', 'Infected', 'Recovered'});
+
+% Display the table
+disp('L2 Error Table for Linear and Quadratic Interpolation:');
+disp(error_table);
+
+%% spread function
+function [S,I,R] = spread(b,g,N,So,Io,Ro,t,h)
+    %b=beta, g=gamma, N=population
+    %t=vector with every t value, h=step size
+
+    %differential equations
+    ds = @(s,i,b,g,N,h)-(b/N)*s*i;
+    di = @(i,s,b,g,N,h)((b/N)*s*i)-(g*i);
+    dr = @(r,i,b,g,N,h)g*i;
+    
+    %k1-4 functions for susceptible
+        function k1s = k1s(s,i,b,g,N,h)
+            k1s = ds(s,i,b,g,N,h); %k1s is just ds(S(t),I(t))
+        end
+        function k2s = k2s(s,i,b,g,N,h)
+            k2s = ds(s+(0.5*h*k1s(s,i,b,g,N,h)),... %current s value plus 0.5h*k1s
+                i+(0.5*h*di(i,s,b,g,N,h)),... %this calculates I(t+0.5h) using explicit method
+                b,g,N,h); %constants needed for the ds function
+        end
+        function k3s = k3s(s,i,b,g,N,h)
+            k3s = ds(s+(0.5*h*k2s(s,i,b,g,N,h)),... %current s value plus 0.5h*k2s
+                i+(0.5*h*di(i,s,b,g,N,h)),...%this calculates I(t+0.5h) using explicit method
+                b,g,N,h);
+        end
+        function k4s = k4s(s,i,b,g,N,h)
+            k4s = ds(s+(h*k3s(s,i,b,g,N,h)),... %current s value plus h*k3s
+                i+h*di(i,s,b,g,N,h),...%this calculates I(t+h) using explicit method
+                b,g,N,h);
+        end
+
+    %k1-4 functions for infected
+    %in general it's the same principles as for susceptible 
+        function k1i = k1i(i,s,b,g,N,h)
+            k1i = di(i,s,b,g,N,h);
+        end
+        function k2i = k2i(i,s,b,g,N,h)
+            k2i = di(i+(0.5*h*k1i(i,s,b,g,N,h)),...
+                s+(0.5*h*ds(s,i,b,g,N,h)),...
+                b,g,N,h);
+        end
+        function k3i = k3i(i,s,b,g,N,h)
+            k3i = di(i+(0.5*h*k2i(i,s,b,g,N,h)), ...
+                s+(0.5*h*ds(s,i,b,g,N,h)), ...
+                b,g,N,h);
+        end
+        function k4i = k4i(i,s,b,g,N,h)
+            k4i = di(i+(h*k3i(i,s,b,g,N,h)), ...
+                s+h*ds(s,i,b,g,N,h), ...
+                b,g,N,h);
+        end
+
+    %k1-4 functions for recovered
+    %this one needs the current s value because di uses s in k2 onward 
+        function k1r = k1r(r,i,s,b,g,N,h) %include s here for consistancy
+            k1r = dr(r,i,b,g,N,h);
+        end
+        function k2r = k2r(r,i,s,b,g,N,h)
+            k2r = dr(r+(0.5*h*k1r(r,i,s,b,g,N,h)), ...
+                i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
+        end
+        function k3r = k3r(r,i,s,b,g,N,h)
+            k3r = dr(r+(0.5*h*k2r(r,i,s,b,g,N,h)), ...
+                i+(0.5*h*di(i,s,b,g,N,h)),b,g,N,h);
+        end
+        function k4r = k4r(r,i,s,b,g,N,h)
+            k4r = dr(r+(h*k3r(r,i,s,b,g,N,h)), ...
+                i+h*di(i,s,b,g,N,h),b,g,N,h);
+        end
+
+    % sets size of each output vector to be the same size as t
+    % also sets the first value of each vector to the initial value given
+    S = zeros(size(t)); S(1) = So;
+    I = zeros(size(t)); I(1) = Io;
+    R = zeros(size(t)); R(1) = Ro;
+
+    %for loop that implements the following formula for each value:
+    % Y(t+1) = Y(t) + (h/6)*(k1+2ks+2k3+k4)
+    for n = 1:size(t,2)-1
+        S(n+1) = S(n)+ (h/6)*(k1s(S(n),I(n),b,g,N,h)+2*k2s(S(n),I(n),b,g,N,h)+...
+            2*k3s(S(n),I(n),b,g,N,h)+k4s(S(n),I(n),b,g,N,h));
+        I(n+1) = I(n)+ (h/6)*(k1i(I(n),S(n),b,g,N,h)+2*k2i(I(n),S(n),b,g,N,h)+...
+            2*k3i(I(n),S(n),b,g,N,h)+k4i(I(n),S(n),b,g,N,h));
+        R(n+1) = R(n)+ (h/6)*(k1r(R(n),I(n),S(n),b,g,N,h)+2*k2r(R(n),I(n),S(n),b,g,N,h)+...
+            2*k3r(R(n),I(n),S(n),b,g,N,h)+k4r(R(n),I(n),S(n),b,g,N,h));
+    end
+   
+end
+
+%% Lagrange Interpolation Function
+function interp_vals = lagrange_interpolation(x, y, x_int)
+    interp_vals = zeros(size(x_int)); % Initialize results
+
+    for k = 1:length(x_int) % Loop over interpolation points
+        x_k = x_int(k); % Current x point to interpolate
+        P = 0; 
+
+        % Use two nearest points around x_k
+        [~, idx] = sort(abs(x - x_k)); % Find the absolute differences between x_k and all points in x
+        %  Sort these differences to identify the smallest ones
+        %  Find the coords of the two smallest differences
+        x0 = x(idx(1)); x1 = x(idx(2)); 
+        f0 = y(idx(1)); f1 = y(idx(2)); 
+
+        % Lagrange Polynomial
+        P = P + ((x_k - x1) / (x0 - x1)) * f0 + ((x_k - x0) / (x1 - x0)) * f1;
+
+        interp_vals(k) = P; % Store result
+    end
+end
+
+%% Apply Quadratic Lagrange Interpolation
+
+function interp_vals = quadratic_lagrange_interpolation(x, y, x_interp)
+    
+    interp_vals = zeros(size(x_interp)); % Initialize results
+    
+    for k = 1:length(x_interp) % Loop over interpolation points
+        x_k = x_interp(k); % Current x point to interpolate
+        P = 0; % Initialize 
+        
+        % Use three nearest points around x_k
+        [~, idx] = sort(abs(x - x_k)); % Find indices of nearest points
+        x0 = x(idx(1)); x1 = x(idx(2)); x2 = x(idx(3)); 
+        f0 = y(idx(1)); f1 = y(idx(2)); f2 = y(idx(3)); 
+        
+        % Quadratic Lagrange Polynomial
+        L0 = ((x_k - x1) * (x_k - x2)) / ((x0 - x1) * (x0 - x2)); 
+        L1 = ((x_k - x0) * (x_k - x2)) / ((x1 - x0) * (x1 - x2)); 
+        L2 = ((x_k - x0) * (x_k - x1)) / ((x2 - x0) * (x2 - x1)); 
+        
+        P = f0 * L0 + f1 * L1 + f2 * L2; % Compute interpolated value
+
+        interp_vals(k) = P; % Store result
+    end
+end
+
