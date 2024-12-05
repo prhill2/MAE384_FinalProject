@@ -1,1 +1,87 @@
+beta0 = 0.3; 
+A = 5;      
+omega1 = 2*pi/1;
+omega2 = 2*pi/3; 
 
+gamma_val = 0.1; 
+h = 0.1;        
+T = 30;          
+t = 0:h:T;       
+
+if mod(T, h) ~= 0
+    T = floor(T/h) * h;
+    t = 0:h:T;
+end
+
+N = 1000;  
+So = 990;  Io = 10;  Ro = 0; 
+S1 = zeros(length(t), 1); I1 = zeros(length(t), 1); R1 = zeros(length(t), 1);
+S2 = zeros(length(t), 1); I2 = zeros(length(t), 1); R2 = zeros(length(t), 1);
+S1(1) = So; I1(1) = Io; R1(1) = Ro;
+S2(1) = So; I2(1) = Io; R2(1) = Ro;
+
+for n = 1:(length(t)-1)
+    beta_t = beta0 * (1 + A * sin(omega1 * t(n)));
+    k1s = -(beta_t / N) * S1(n) * I1(n);
+    k1i = (beta_t / N) * S1(n) * I1(n) - gamma_val * I1(n);
+    k1r = gamma_val * I1(n);
+
+    k2s = -(beta_t / N) * (S1(n) + 0.5 * h * k1s) * (I1(n) + 0.5 * h * k1i);
+    k2i = (beta_t / N) * (S1(n) + 0.5 * h * k1s) * (I1(n) + 0.5 * h * k1i) - gamma_val * (I1(n) + 0.5 * h * k1i);
+    k2r = gamma_val * (I1(n) + 0.5 * h * k1i);
+
+    k3s = -(beta_t / N) * (S1(n) + 0.5 * h * k2s) * (I1(n) + 0.5 * h * k2i);
+    k3i = (beta_t / N) * (S1(n) + 0.5 * h * k2s) * (I1(n) + 0.5 * h * k2i) - gamma_val * (I1(n) + 0.5 * h * k2i);
+    k3r = gamma_val * (I1(n) + 0.5 * h * k2i);
+
+    k4s = -(beta_t / N) * (S1(n) + h * k3s) * (I1(n) + h * k3i);
+    k4i = (beta_t / N) * (S1(n) + h * k3s) * (I1(n) + h * k3i) - gamma_val * (I1(n) + h * k3i);
+    k4r = gamma_val * (I1(n) + h * k3i);
+
+    S1(n+1) = S1(n) + (h/6) * (k1s + 2*k2s + 2*k3s + k4s);
+    I1(n+1) = I1(n) + (h/6) * (k1i + 2*k2i + 2*k3i + k4i);
+    R1(n+1) = R1(n) + (h/6) * (k1r + 2*k2r + 2*k3r + k4r);
+end
+
+for n = 1:(length(t)-1)
+    beta_t = beta0 * (1 + A * sin(omega2 * t(n)));
+    k1s = -(beta_t / N) * S2(n) * I2(n);
+    k1i = (beta_t / N) * S2(n) * I2(n) - gamma_val * I2(n);
+    k1r = gamma_val * I2(n);
+
+    k2s = -(beta_t / N) * (S2(n) + 0.5 * h * k1s) * (I2(n) + 0.5 * h * k1i);
+    k2i = (beta_t / N) * (S2(n) + 0.5 * h * k1s) * (I2(n) + 0.5 * h * k1i) - gamma_val * (I2(n) + 0.5 * h * k1i);
+    k2r = gamma_val * (I2(n) + 0.5 * h * k1i);
+
+    k3s = -(beta_t / N) * (S2(n) + 0.5 * h * k2s) * (I2(n) + 0.5 * h * k2i);
+    k3i = (beta_t / N) * (S2(n) + 0.5 * h * k2s) * (I2(n) + 0.5 * h * k2i) - gamma_val * (I2(n) + 0.5 * h * k2i);
+    k3r = gamma_val * (I2(n) + 0.5 * h * k2i);
+
+    k4s = -(beta_t / N) * (S2(n) + h * k3s) * (I2(n) + h * k3i);
+    k4i = (beta_t / N) * (S2(n) + h * k3s) * (I2(n) + h * k3i) - gamma_val * (I2(n) + h * k3i);
+    k4r = gamma_val * (I2(n) + h * k3i);
+
+   
+    S2(n+1) = S2(n) + (h/6) * (k1s + 2*k2s + 2*k3s + k4s);
+    I2(n+1) = I2(n) + (h/6) * (k1i + 2*k2i + 2*k3i + k4i);
+    R2(n+1) = R2(n) + (h/6) * (k1r + 2*k2r + 2*k3r + k4r);
+end
+
+FFT_I1 = fft(I1);
+FFT_I2 = fft(I2);
+
+
+N = length(t);
+f = (0:N/2) / (N * h);
+
+figure;
+plot(f, abs(FFT_I1(1:N/2+1)));
+title('FFT of Infected (Daily Periodicity)');
+xlabel('Frequency (1/day)');
+ylabel('Magnitude');
+
+figure;
+plot(f, abs(FFT_I2(1:N/2+1)));
+title('FFT of Infected (Weekly Periodicity)');
+xlabel('Frequency (1/day)');
+ylabel('Magnitude');
