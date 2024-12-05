@@ -8,10 +8,6 @@ h = 0.1;
 T = 30;          
 t = 0:h:T;       
 
-if mod(T, h) ~= 0
-    T = floor(T/h) * h;
-    t = 0:h:T;
-end
 
 N = 1000;  
 So = 990;  Io = 10;  Ro = 0; 
