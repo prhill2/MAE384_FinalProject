@@ -68,7 +68,7 @@ FFT_I2 = fft(I2);
 
 
 N = length(t)-1;
-f = (0:N/2) / (N * h);
+f = (0:N/2) / T;
 
 figure;
 plot(f, abs(FFT_I1(1:N/2+1)));
