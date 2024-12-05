@@ -45,9 +45,9 @@ t_model = 0:h_model:99; % Time points
 [SI_model, II_model, RI_model] = spread(0.3, 0.1, 1000, So, Io, Ro, t_model, h_model);
 
 % Extract model values at the odd_days
-model_SI = SI_model(odd_days);  
-model_II = II_model(odd_days); 
-model_RI = RI_model(odd_days);  
+model_SI = SI_model(odd_days+1)
+model_II = II_model(odd_days+1); 
+model_RI = RI_model(odd_days+1);  
 
 % Compute L2 errors
 EL2_S = sqrt(sum((interp_SI - model_SI).^2) / Nint);
@@ -217,13 +217,13 @@ function interp_vals = quadratic_lagrange_interpolation(x, y, x_interp)
         f0 = y(idx(1)); f1 = y(idx(2)); f2 = y(idx(3)); 
         
         % Quadratic Lagrange Polynomial
-        L0 = ((x_k - x1) * (x_k - x2)) / ((x0 - x1) * (x0 - x2)); 
-        L1 = ((x_k - x0) * (x_k - x2)) / ((x1 - x0) * (x1 - x2)); 
-        L2 = ((x_k - x0) * (x_k - x1)) / ((x2 - x0) * (x2 - x1)); 
-        
-        P = f0 * L0 + f1 * L1 + f2 * L2; % Compute interpolated value
+        P = f0 * ((x_k - x1) * (x_k - x2)) / ((x0 - x1) * (x0 - x2))...
+            + f1 * ((x_k - x0) * (x_k - x2)) / ((x1 - x0) * (x1 - x2))...
+            + f2 * ((x_k - x0) * (x_k - x1)) / ((x2 - x0) * (x2 - x1)); % Compute interpolated value
 
         interp_vals(k) = P; % Store result
     end
 end
+
+
 
