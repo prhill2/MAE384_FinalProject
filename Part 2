@@ -1,18 +1,18 @@
 %% Part 2
-%% sets initial values
-N = 1000; %population
-h = 1; %step size
-t = 0:h:99; %time span
-So = 990; %initial susceptible
-Io = 10; %initial infected
-Ro = 0; %initial recovered
+%% initial values
+N = 1000; % population
+h = 1; % step size
+t = 0:h:99; % time span
+So = 990; % initial susceptible
+Io = 10; % initial infected
+Ro = 0; % initial recovered
 
-[SI,II,RI] = spread(0.3,0.1,1000,990,10,0,t,h); %Influenza
+[SI,II,RI] = spread(0.3,0.1,1000,990,10,0,t,h); % Influenza
 
 %% Linear Lagrange Interpolation
 odd_days = 1:2:99; % Odd days to interpolate
-even_days = 0:2:99; %used to take just the even values from teh spread function
-SI = SI(even_days+1); %need +1 because index starts at 1 not 0
+even_days = 0:2:99; % used to take just the even values from teh spread function
+SI = SI(even_days+1); % need +1 because index starts at 1 not 0
 II = II(even_days+1);
 RI = RI(even_days+1);
 t = t(even_days+1);
@@ -28,13 +28,11 @@ quad_interp_RI = quadratic_lagrange_interpolation(t, RI, odd_days);
 
 %% Linear Lagrange Results
 disp('Interpolated Values:');
-disp(table(odd_days', interp_SI', interp_II', interp_RI', ...
-    'VariableNames', {'Day', 'Susceptible', 'Infected', 'Recovered'}))
+disp(table(odd_days', interp_SI', interp_II', interp_RI', 'VariableNames', {'Day', 'Susceptible', 'Infected', 'Recovered'}))
 
 %% Quadratic Lagrange Results
 disp('Interpolated Values:');
-disp(table(odd_days', quad_interp_SI', quad_interp_II', quad_interp_RI', ...
-    'VariableNames', {'Day', 'Susceptible', 'Infected', 'Recovered'}))
+disp(table(odd_days', quad_interp_SI', quad_interp_II', quad_interp_RI', 'VariableNames', {'Day', 'Susceptible', 'Infected', 'Recovered'}))
 
 %% Compute Linear L2 Error
 Nint = length(odd_days); % Nint is the total number of interpolated points
