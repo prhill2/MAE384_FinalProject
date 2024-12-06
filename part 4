@@ -70,14 +70,22 @@ FFT_I2 = fft(I2);
 N = length(t)-1;
 f = (0:N/2) / T;
 
+P2_I1 = abs(FFT_I1/N);
+P1_I1 = P2_I1(1:N/2+1);
+P1_I1(2:end-1) = 2*P1_I1(2:end-1);
+
 figure;
-plot(f, abs(FFT_I1(1:N/2+1)));
+plot(f,P1_I1);
 title('FFT of Infected (Daily Periodicity)');
 xlabel('Frequency (1/day)');
 ylabel('Magnitude');
 
+P2_I2 = abs(FFT_I2/N);
+P1_I2 = P2_I2(1:N/2+1);
+P1_I2(2:end-1) = 2*P1_I2(2:end-1);
+
 figure;
-plot(f, abs(FFT_I2(1:N/2+1)));
+plot(f, P1_I2);
 title('FFT of Infected (Weekly Periodicity)');
 xlabel('Frequency (1/day)');
 ylabel('Magnitude');
